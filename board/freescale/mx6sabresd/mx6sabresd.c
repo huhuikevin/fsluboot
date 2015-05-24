@@ -273,6 +273,7 @@ static void setup_iomux_uart(void)
 
 #ifdef CONFIG_SYS_I2C_MXC
 
+#define PMIC_I2C_ADDR 0x08
 /* set all switches APS in normal and PFM mode in standby */
 static int setup_pmic_mode(int chip)
 {
@@ -289,13 +290,13 @@ static int setup_pmic_mode(int chip)
 	}
 
 	value = 0xc;
-	if (i2c_write(0x10, 0x23, 1, &value, 1)) {
+	if (i2c_write(PMIC_I2C_ADDR, 0x23, 1, &value, 1)) {
 		printf("Set SW1AB mode error!\n");
 		return -1;
 	}
 
 	for (i = 0; i < switch_num - 1; i++) {
-		if (i2c_write(0x10, offset + i * 7, 1, &value, 1)) {
+		if (i2c_write(PMIC_I2C_ADDR, offset + i * 7, 1, &value, 1)) {
 			printf("Set switch%x mode error!\n", offset);
 			return -1;
 		}
@@ -309,12 +310,12 @@ static int setup_pmic_voltages(void)
 	unsigned char value, rev_id = 0 ;
 
 	i2c_set_bus_num(2);
-	if (!i2c_probe(0x10)) {
-		if (i2c_read(0x10, 0, 1, &value, 1)) {
+	if (!i2c_probe(PMIC_I2C_ADDR)) {
+		if (i2c_read(PMIC_I2C_ADDR, 0, 1, &value, 1)) {
 			printf("Read device ID error!\n");
 			return -1;
 		}
-		if (i2c_read(0x10, 3, 1, &rev_id, 1)) {
+		if (i2c_read(PMIC_I2C_ADDR, 3, 1, &rev_id, 1)) {
 			printf("Read Rev ID error!\n");
 			return -1;
 		}
@@ -331,70 +332,70 @@ static int setup_pmic_voltages(void)
 		*VGEN3 for camera 2.8V power supply
 		*/
 		/*increase VGEN3 from 2.5 to 2.8V*/
-		if (i2c_read(0x10, 0x6e, 1, &value, 1)) {
+		if (i2c_read(PMIC_I2C_ADDR, 0x6e, 1, &value, 1)) {
 			printf("Read VGEN3 error!\n");
 			return -1;
 		}
 		value &= ~0xf;
 		value |= 0xa;
-		if (i2c_write(0x10, 0x6e, 1, &value, 1)) {
+		if (i2c_write(PMIC_I2C_ADDR, 0x6e, 1, &value, 1)) {
 			printf("Set VGEN3 error!\n");
 			return -1;
 		}
 		/*increase VGEN5 from 2.8 to 3V*/
-		if (i2c_read(0x10, 0x70, 1, &value, 1)) {
+		if (i2c_read(PMIC_I2C_ADDR, 0x70, 1, &value, 1)) {
 			printf("Read VGEN5 error!\n");
 			return -1;
 		}
 		value &= ~0xf;
 		value |= 0xc;
-		if (i2c_write(0x10, 0x70, 1, &value, 1)) {
+		if (i2c_write(PMIC_I2C_ADDR, 0x70, 1, &value, 1)) {
 			printf("Set VGEN5 error!\n");
 			return -1;
 		}
 		/* set SW1AB staby volatage 0.975V*/
-		if (i2c_read(0x10, 0x21, 1, &value, 1)) {
+		if (i2c_read(PMIC_I2C_ADDR, 0x21, 1, &value, 1)) {
 			printf("Read SW1ABSTBY error!\n");
 			return -1;
 		}
 		value &= ~0x3f;
 		value |= 0x1b;
-		if (i2c_write(0x10, 0x21, 1, &value, 1)) {
+		if (i2c_write(PMIC_I2C_ADDR, 0x21, 1, &value, 1)) {
 			printf("Set SW1ABSTBY error!\n");
 			return -1;
 		}
 		/* set SW1AB/VDDARM step ramp up time from 16us to 4us/25mV */
-		if (i2c_read(0x10, 0x24, 1, &value, 1)) {
+		if (i2c_read(PMIC_I2C_ADDR, 0x24, 1, &value, 1)) {
 			printf("Read SW1ABSTBY error!\n");
 			return -1;
 		}
 		value &= ~0xc0;
 		value |= 0x40;
-		if (i2c_write(0x10, 0x24, 1, &value, 1)) {
+		if (i2c_write(PMIC_I2C_ADDR, 0x24, 1, &value, 1)) {
 			printf("Set SW1ABSTBY error!\n");
 			return -1;
 		}
 
 		/* set SW1C staby volatage 0.975V*/
-		if (i2c_read(0x10, 0x2f, 1, &value, 1)) {
+		if (i2c_read(PMIC_I2C_ADDR, 0x2f, 1, &value, 1)) {
 			printf("Read SW1CSTBY error!\n");
 			return -1;
 		}
 		value &= ~0x3f;
 		value |= 0x1b;
-		if (i2c_write(0x10, 0x2f, 1, &value, 1)) {
+		if (i2c_write(PMIC_I2C_ADDR, 0x2f, 1, &value, 1)) {
 			printf("Set SW1CSTBY error!\n");
 			return -1;
 		}
 
 		/* set SW1C/VDDSOC step ramp up time to from 16us to 4us/25mV */
-		if (i2c_read(0x10, 0x32, 1, &value, 1)) {
+		if (i2c_read(PMIC_I2C_ADDR, 0x32, 1, &value, 1)) {
 			printf("Read SW1ABSTBY error!\n");
 			return -1;
 		}
 		value &= ~0xc0;
 		value |= 0x40;
-		if (i2c_write(0x10, 0x32, 1, &value, 1)) {
+		if (i2c_write(PMIC_I2C_ADDR, 0x32, 1, &value, 1)) {
 			printf("Set SW1ABSTBY error!\n");
 			return -1;
 		}
@@ -415,24 +416,24 @@ void ldo_mode_set(int ldo_bypass)
 		ldo_bypass = 0;	/* ldo_enable on 1.2G chip */
 		printf("1.2G chip, increase VDDARM_IN/VDDSOC_IN\n");
 		/* increase VDDARM to 1.425V */
-		if (i2c_read(0x10, 0x20, 1, &value, 1)) {
+		if (i2c_read(PMIC_I2C_ADDR, 0x20, 1, &value, 1)) {
 			printf("Read SW1AB error!\n");
 			return;
 		}
 		value &= ~0x3f;
 		value |= 0x2d;
-		if (i2c_write(0x10, 0x20, 1, &value, 1)) {
+		if (i2c_write(PMIC_I2C_ADDR, 0x20, 1, &value, 1)) {
 			printf("Set SW1AB error!\n");
 			return;
 		}
 		/* increase VDDSOC to 1.425V */
-		if (i2c_read(0x10, 0x2e, 1, &value, 1)) {
+		if (i2c_read(PMIC_I2C_ADDR, 0x2e, 1, &value, 1)) {
 			printf("Read SW1C error!\n");
 			return;
 		}
 		value &= ~0x3f;
 		value |= 0x2d;
-		if (i2c_write(0x10, 0x2e, 1, &value, 1)) {
+		if (i2c_write(PMIC_I2C_ADDR, 0x2e, 1, &value, 1)) {
 			printf("Set SW1C error!\n");
 			return;
 		}
@@ -442,7 +443,7 @@ void ldo_mode_set(int ldo_bypass)
 		prep_anatop_bypass();
 
 		/* decrease VDDARM for 400Mhz DQ:1.1V, DL:1.275V */
-		if (i2c_read(0x10, 0x20, 1, &value, 1)) {
+		if (i2c_read(PMIC_I2C_ADDR, 0x20, 1, &value, 1)) {
 			printf("Read SW1AB error!\n");
 			return;
 		}
@@ -452,18 +453,18 @@ void ldo_mode_set(int ldo_bypass)
 #else
 		value |= 0x20;
 #endif
-		if (i2c_write(0x10, 0x20, 1, &value, 1)) {
+		if (i2c_write(PMIC_I2C_ADDR, 0x20, 1, &value, 1)) {
 			printf("Set SW1AB error!\n");
 			return;
 		}
 		/* increase VDDSOC to 1.3V */
-		if (i2c_read(0x10, 0x2e, 1, &value, 1)) {
+		if (i2c_read(PMIC_I2C_ADDR, 0x2e, 1, &value, 1)) {
 			printf("Read SW1C error!\n");
 			return;
 		}
 		value &= ~0x3f;
 		value |= 0x28;
-		if (i2c_write(0x10, 0x2e, 1, &value, 1)) {
+		if (i2c_write(PMIC_I2C_ADDR, 0x2e, 1, &value, 1)) {
 			printf("Set SW1C error!\n");
 			return;
 		}
@@ -489,25 +490,25 @@ void ldo_mode_set(int ldo_bypass)
 #else
 			vddarm = 0x22;
 #endif
-		if (i2c_read(0x10, 0x20, 1, &value, 1)) {
+		if (i2c_read(PMIC_I2C_ADDR, 0x20, 1, &value, 1)) {
 			printf("Read SW1AB error!\n");
 			return;
 		}
 		value &= ~0x3f;
 		value |= vddarm;
-		if (i2c_write(0x10, 0x20, 1, &value, 1)) {
+		if (i2c_write(PMIC_I2C_ADDR, 0x20, 1, &value, 1)) {
 			printf("Set SW1AB error!\n");
 			return;
 		}
 
 		/* decrease VDDSOC to 1.175V */
-		if (i2c_read(0x10, 0x2e, 1, &value, 1)) {
+		if (i2c_read(PMIC_I2C_ADDR, 0x2e, 1, &value, 1)) {
 			printf("Read SW1C error!\n");
 			return;
 		}
 		value &= ~0x3f;
 		value |= 0x23;
-		if (i2c_write(0x10, 0x2e, 1, &value, 1)) {
+		if (i2c_write(PMIC_I2C_ADDR, 0x2e, 1, &value, 1)) {
 			printf("Set SW1C error!\n");
 			return;
 		}
@@ -1197,7 +1198,7 @@ int board_late_init(void)
 
 #ifdef CONFIG_SYS_I2C_MXC
 	setup_i2c(2, CONFIG_SYS_I2C_SPEED,
-			0x10, &i2c_pad_info1);
+			0x1f, &i2c_pad_info1);
 	ret = setup_pmic_voltages();
 	if (ret)
 		return -1;	
